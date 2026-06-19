@@ -161,15 +161,17 @@
 
     <div id="mimica-espera" class="caja-juego oculto">
       <div class="turno-actual" id="mimica-turno"></div>
-      <p class="instrucciones">🤫 La palabra secreta ya está en la Vista de Administrador. Cuando el actor esté listo, inicia el cronómetro.</p>
-      <button class="btn btn-grande btn-dorado" id="btn-iniciar-cronometro">▶️ Iniciar Cronómetro (45s)</button>
+      <p class="instrucciones">🤫 La palabra secreta ya está en la Vista de Administrador. Cuando el actor esté listo, inicia los 4 minutos.</p>
+      <button class="btn btn-grande btn-dorado" id="btn-iniciar-cronometro">▶️ Iniciar Ronda (4:00)</button>
     </div>
 
     <div id="mimica-juego" class="caja-juego oculto">
       <div class="turno-actual" id="mimica-turno-2"></div>
-      <div id="mimica-cronometro" class="cronometro">45</div>
+      <div id="mimica-cronometro" class="cronometro">4:00</div>
+      <div class="contador-aciertos" id="mimica-contador-aciertos">Palabras adivinadas: 0</div>
       <div class="botonera">
-        <button class="btn btn-grande btn-verde" id="btn-mimica-acerto">✅ ¡Equipo Adivinó!</button>
+        <button class="btn btn-grande btn-verde" id="btn-mimica-acerto">✅ ¡Adivinaron!</button>
+        <button class="btn btn-secundario" id="btn-mimica-pasar">⏭️ Pasar Palabra</button>
       </div>
       <div id="mimica-resultado" class="resultado-feedback"></div>
     </div>

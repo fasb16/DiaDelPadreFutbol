@@ -389,6 +389,12 @@ h1, h2, h3 {
   color: var(--rojo);
   animation: pulso 0.5s infinite;
 }
+.contador-aciertos {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--verde-claro);
+  margin-bottom: 16px;
+}
 @keyframes pulso {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.08); }

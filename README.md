@@ -60,10 +60,11 @@ Como las pistas se muestran en la misma pantalla que ve el público, normalmente
 ### 6. Mímica de Acciones 🎭
 - Selecciona el equipo que va a actuar y pulsa **"🎲 Asignar Palabra Secreta"**.
 - La palabra (una acción cotidiana, ej. "Pasear a la mascota", "Viendo televisión") se asigna en secreto — **solo aparece en la Vista de Administrador**, nunca en la pantalla pública.
-- El actor del equipo se acerca a ver la Vista de Administrador (sin que el público la vea), y cuando esté listo, el anfitrión pulsa **"▶️ Iniciar Cronómetro (45s)"**.
-- El actor representa la acción sin hablar mientras su equipo adivina contra el reloj.
-- Mientras más tiempo quede al adivinar, más puntos se ganan:
-  - 30s o más restantes: 20 pts · 15-29s restantes: 15 pts · 1-14s restantes: 10 pts · tiempo agotado: 0 pts
+- El actor del equipo se acerca a ver la Vista de Administrador (sin que el público la vea), y cuando esté listo, el anfitrión pulsa **"▶️ Iniciar Ronda (4:00)"**.
+- Es una **ronda de velocidad de 4 minutos por equipo**: el actor va representando acciones sin hablar y su equipo adivina contra el reloj.
+- Cada palabra adivinada correctamente (botón **"✅ ¡Adivinaron!"**) suma **10 puntos** y de inmediato aparece una nueva palabra secreta para seguir intentando.
+- Si una palabra está muy difícil, el anfitrión puede pulsar **"⏭️ Pasar Palabra"** para saltarla sin puntos y continuar con otra.
+- Cuando se acaban los 4 minutos, se muestra cuántas palabras adivinó el equipo en total y los puntos ganados.
 - Banco de más de 75 acciones distintas para actuar.
 
 ## Efectos de sonido

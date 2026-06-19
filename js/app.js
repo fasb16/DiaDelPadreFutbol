@@ -528,12 +528,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ==================== JUEGO 4: MÍMICA DE ACCIONES ====================
-  const DURACION_MIMICA = 45; // segundos
+  const DURACION_MIMICA = 4 * 60; // 4 minutos por equipo
+  const PUNTOS_MIMICA = 10; // puntos por cada palabra adivinada
   const CLAVE_ADMIN_MIMICA = "diaDelPadreFutbol_adminMimica_v1";
 
   let mimicaActual = null; // { equipoId, palabra }
   let mimicaSegundosRestantes = DURACION_MIMICA;
   let mimicaIntervalo = null;
+  let mimicaAciertos = 0;
 
   function difundirEstadoAdminMimica() {
     try {
@@ -549,11 +551,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return disponibles[Math.floor(Math.random() * disponibles.length)];
   }
 
+  function asignarNuevaPalabraMimica(equipoId) {
+    mimicaActual = { equipoId, palabra: obtenerPalabraMimicaAleatoria() };
+    difundirEstadoAdminMimica();
+  }
+
   document.getElementById("btn-asignar-palabra").addEventListener("click", () => {
     const equipoId = parseInt(document.getElementById("mimica-equipo").value, 10);
     const equipo = Estado.obtenerEquipo(equipoId);
-    mimicaActual = { equipoId, palabra: obtenerPalabraMimicaAleatoria() };
-    difundirEstadoAdminMimica();
+    asignarNuevaPalabraMimica(equipoId);
 
     document.getElementById("mimica-turno").textContent = `🎭 Actúa: ${equipo.nombre}`;
     document.getElementById("mimica-seleccion").classList.add("oculto");
@@ -562,11 +568,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-iniciar-cronometro").addEventListener("click", () => {
     const equipo = Estado.obtenerEquipo(mimicaActual.equipoId);
+    mimicaAciertos = 0;
     document.getElementById("mimica-turno-2").textContent = `🎭 Actúa: ${equipo.nombre}`;
     document.getElementById("mimica-espera").classList.add("oculto");
     document.getElementById("mimica-juego").classList.remove("oculto");
     document.getElementById("mimica-resultado").textContent = "";
+    document.getElementById("mimica-contador-aciertos").textContent = "Palabras adivinadas: 0";
     document.getElementById("btn-mimica-acerto").disabled = false;
+    document.getElementById("btn-mimica-pasar").disabled = false;
     iniciarCronometroMimica();
   });
 
@@ -580,12 +589,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Sonidos.tic();
       }
       if (mimicaSegundosRestantes <= 0) {
-        detenerCronometroMimica();
-        Sonidos.finCronometro();
-        document.getElementById("btn-mimica-acerto").disabled = true;
-        document.getElementById("mimica-resultado").textContent = `⏱️ ¡Se acabó el tiempo! La acción era: "${mimicaActual.palabra}".`;
-        Estado.marcarPalabraMimicaUsada(mimicaActual.palabra);
-        setTimeout(finalizarTurnoMimica, 2800);
+        terminarRondaMimicaPorTiempo();
       }
     }, 1000);
   }
@@ -599,37 +603,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function actualizarVisualCronometro() {
     const cronoDiv = document.getElementById("mimica-cronometro");
-    cronoDiv.textContent = mimicaSegundosRestantes;
-    cronoDiv.classList.toggle("urgente", mimicaSegundosRestantes <= 10);
-  }
-
-  function puntosPorTiempoRestante(segundos) {
-    if (segundos >= 30) return 20;
-    if (segundos >= 15) return 15;
-    return 10;
+    const minutos = Math.floor(mimicaSegundosRestantes / 60);
+    const segundos = mimicaSegundosRestantes % 60;
+    cronoDiv.textContent = `${minutos}:${segundos.toString().padStart(2, "0")}`;
+    cronoDiv.classList.toggle("urgente", mimicaSegundosRestantes <= 15);
   }
 
   document.getElementById("btn-mimica-acerto").addEventListener("click", () => {
-    detenerCronometroMimica();
-    document.getElementById("btn-mimica-acerto").disabled = true;
     const equipo = Estado.obtenerEquipo(mimicaActual.equipoId);
-    const puntos = puntosPorTiempoRestante(mimicaSegundosRestantes);
-    Estado.sumarPuntos(mimicaActual.equipoId, puntos, "Mímica de Acciones");
+    Estado.sumarPuntos(mimicaActual.equipoId, PUNTOS_MIMICA, "Mímica de Acciones");
     Estado.marcarPalabraMimicaUsada(mimicaActual.palabra);
+    mimicaAciertos++;
     renderMarcadorGlobal();
     Sonidos.correcto();
+    document.getElementById("mimica-contador-aciertos").textContent = `Palabras adivinadas: ${mimicaAciertos}`;
     document.getElementById("mimica-resultado").textContent =
-      `✅ ¡${equipo.nombre} adivinó "${mimicaActual.palabra}"! Gana ${puntos} puntos (quedaban ${mimicaSegundosRestantes}s).`;
-    setTimeout(finalizarTurnoMimica, 2800);
+      `✅ ¡${equipo.nombre} adivinó "${mimicaActual.palabra}"! +${PUNTOS_MIMICA} puntos.`;
+    asignarNuevaPalabraMimica(mimicaActual.equipoId);
   });
 
-  function finalizarTurnoMimica() {
+  document.getElementById("btn-mimica-pasar").addEventListener("click", () => {
+    Estado.marcarPalabraMimicaUsada(mimicaActual.palabra);
+    Sonidos.click();
+    document.getElementById("mimica-resultado").textContent = `⏭️ Palabra pasada: "${mimicaActual.palabra}". ¡Sigan intentando!`;
+    asignarNuevaPalabraMimica(mimicaActual.equipoId);
+  });
+
+  function terminarRondaMimicaPorTiempo() {
+    detenerCronometroMimica();
+    Sonidos.finCronometro();
+    document.getElementById("btn-mimica-acerto").disabled = true;
+    document.getElementById("btn-mimica-pasar").disabled = true;
+    const equipo = Estado.obtenerEquipo(mimicaActual.equipoId);
+    const puntosGanados = mimicaAciertos * PUNTOS_MIMICA;
     mimicaActual = null;
     difundirEstadoAdminMimica();
     document.getElementById("mimica-juego").classList.add("oculto");
     document.getElementById("mimica-final").classList.remove("oculto");
-    document.getElementById("mimica-final-titulo").textContent = "🎉 ¡Turno terminado! 🎉";
-    document.getElementById("mimica-final-resumen").textContent = "Vuelve a entrar a este juego para asignarle un turno a otro equipo.";
+    document.getElementById("mimica-final-titulo").textContent = "🎉 ¡Tiempo terminado! 🎉";
+    document.getElementById("mimica-final-resumen").textContent =
+      `${equipo.nombre} adivinó ${mimicaAciertos} palabra(s) y ganó ${puntosGanados} puntos en total.`;
   }
 
   document.getElementById("btn-mimica-cancelar").addEventListener("click", () => {
