@@ -8,9 +8,16 @@
 </head>
 <body>
 
+<div id="flash-pantalla" class="flash-pantalla"></div>
+<div id="toast-container" class="toast-container"></div>
+
 <header id="marcador-global" class="marcador-global oculto">
   <div class="marcador-titulo">🏆 Marcador en Vivo 🏆</div>
   <div id="marcador-lista" class="marcador-lista"></div>
+  <div class="botonera-header">
+    <button class="btn btn-secundario btn-deshacer" id="btn-deshacer">↩️ Deshacer última jugada</button>
+    <button class="btn btn-secundario btn-compacto" id="btn-modo-compacto">📱 Modo compacto</button>
+  </div>
 </header>
 
 <main id="app">
@@ -54,6 +61,9 @@
       </button>
       <button class="btn btn-juego btn-tabla" id="btn-menu-tabla">
         <span class="emoji-juego">📊</span> Tabla de Posiciones
+      </button>
+      <button class="btn btn-juego btn-historial" id="btn-menu-historial">
+        <span class="emoji-juego">📜</span> Historial de Jugadas
       </button>
     </div>
     <div class="botonera">
@@ -110,29 +120,28 @@
     </div>
 
     <div id="penales-juego" class="caja-juego oculto">
+      <div class="tabla-penales-wrap">
+        <table class="tabla-penales" id="tabla-penales">
+          <tbody></tbody>
+        </table>
+      </div>
+
       <div class="turno-actual" id="penales-turno"></div>
       <div class="contador-pregunta" id="penales-contador"></div>
 
-      <div id="penales-fase-disparo" class="fase-penal">
-        <p class="instrucciones-penal">⚽ El equipo atacante elige dónde disparar:</p>
-        <div class="porteria">
-          <button class="zona zona-arriba-izq" data-zona="arriba-izquierda">↖️<br>Arriba Izq.</button>
-          <button class="zona zona-centro" data-zona="centro">⏺️<br>Centro</button>
-          <button class="zona zona-arriba-der" data-zona="arriba-derecha">↗️<br>Arriba Der.</button>
-          <button class="zona zona-abajo-izq" data-zona="abajo-izquierda">↙️<br>Abajo Izq.</button>
-          <button class="zona zona-abajo-der" data-zona="abajo-derecha">↘️<br>Abajo Der.</button>
+      <div class="escenario-penal" id="escenario-penal">
+        <div class="porteria" id="porteria-penal">
+          <div class="red-arco"></div>
+          <button class="zona zona-arriba-izq" data-zona="arriba-izquierda">↖️</button>
+          <button class="zona zona-centro" data-zona="centro">⏺️</button>
+          <button class="zona zona-arriba-der" data-zona="arriba-derecha">↗️</button>
+          <button class="zona zona-abajo-izq" data-zona="abajo-izquierda">↙️</button>
+          <button class="zona zona-abajo-der" data-zona="abajo-derecha">↘️</button>
+          <div class="portero-anim" id="portero-anim">🧤</div>
+          <div class="balon-anim" id="balon-anim">⚽</div>
+          <div class="resultado-sello oculto" id="resultado-sello"></div>
         </div>
-      </div>
-
-      <div id="penales-fase-atajada" class="fase-penal oculto">
-        <p class="instrucciones-penal">🧤 El equipo portero elige dónde atajar:</p>
-        <div class="porteria">
-          <button class="zona zona-arriba-izq" data-zona="arriba-izquierda">↖️<br>Arriba Izq.</button>
-          <button class="zona zona-centro" data-zona="centro">⏺️<br>Centro</button>
-          <button class="zona zona-arriba-der" data-zona="arriba-derecha">↗️<br>Arriba Der.</button>
-          <button class="zona zona-abajo-izq" data-zona="abajo-izquierda">↙️<br>Abajo Izq.</button>
-          <button class="zona zona-abajo-der" data-zona="abajo-derecha">↘️<br>Abajo Der.</button>
-        </div>
+        <p class="instrucciones-penal" id="instrucciones-penal">⚽ El equipo atacante elige dónde disparar:</p>
       </div>
 
       <div id="penales-resultado" class="resultado-feedback"></div>
@@ -172,6 +181,7 @@
       <div class="botonera">
         <button class="btn btn-grande btn-verde" id="btn-mimica-acerto">✅ ¡Adivinaron!</button>
         <button class="btn btn-secundario" id="btn-mimica-pasar">⏭️ Pasar Palabra</button>
+        <button class="btn btn-secundario" id="btn-mimica-pausar">⏸️ Pausar</button>
       </div>
       <div id="mimica-resultado" class="resultado-feedback"></div>
     </div>
@@ -219,6 +229,13 @@
     <button class="btn btn-secundario btn-volver" id="btn-tabla-volver">⬅️ Volver al menú</button>
   </section>
 
+  <!-- PANTALLA HISTORIAL DE JUGADAS -->
+  <section id="pantalla-historial" class="pantalla">
+    <h2 class="titulo-pantalla">📜 Historial de Jugadas</h2>
+    <div id="historial-lista" class="historial-lista"></div>
+    <button class="btn btn-secundario btn-volver" id="btn-historial-volver">⬅️ Volver al menú</button>
+  </section>
+
   <!-- PANTALLA GANADOR -->
   <section id="pantalla-ganador" class="pantalla">
     <div class="confeti" id="confeti"></div>
@@ -229,6 +246,7 @@
       <div id="podio-completo" class="podio-completo"></div>
       <div class="botonera">
         <button class="btn btn-grande btn-dorado" id="btn-ganador-volver">⬅️ Volver al menú</button>
+        <button class="btn btn-secundario" id="btn-imprimir-resultados">🖨️ Imprimir Resultados</button>
         <button class="btn btn-secundario btn-peligro" id="btn-ganador-reiniciar">🔄 Nuevo Torneo</button>
       </div>
     </div>

@@ -38,7 +38,7 @@ El marcador en vivo de todos los equipos se muestra fijo en la parte superior du
 - Son 8 preguntas por ronda. Al terminar, se puede iniciar otra ronda con otros equipos.
 
 ### 4. Penales de la Suerte 🥅
-- Selecciona los 2 equipos (uno dispara, el otro ataja).
+- Selecciona los 2 equipos. Quién dispara primero se decide al azar (sorteo) en cada tanda.
 - El equipo atacante elige una zona de disparo (centro, arriba/abajo izquierda o derecha) y el anfitrión hace clic.
 - Luego el equipo portero elige dónde atajar y el anfitrión hace clic.
 - Si las zonas coinciden → **atajada**. Si no coinciden → **¡gol!** y el equipo atacante gana **10 puntos**.
@@ -65,6 +65,7 @@ Como las pistas se muestran en la misma pantalla que ve el público, normalmente
 - Cada palabra adivinada correctamente (botón **"✅ ¡Adivinaron!"**) suma **10 puntos** y de inmediato aparece una nueva palabra secreta para seguir intentando.
 - Si una palabra está muy difícil, el anfitrión puede pulsar **"⏭️ Pasar Palabra"** para saltarla sin puntos y continuar con otra.
 - Cuando se acaban los 4 minutos, se muestra cuántas palabras adivinó el equipo en total y los puntos ganados.
+- El botón **"⏸️ Pausar"** detiene el cronómetro sin perder el tiempo restante (útil ante una interrupción); pulsa **"▶️ Reanudar"** para continuar.
 - Banco de más de 75 acciones distintas para actuar.
 
 ## Efectos de sonido
@@ -73,7 +74,11 @@ Los sonidos de gol, celebración, atajada, respuesta correcta/incorrecta y victo
 
 ## Persistencia de datos
 
-Los puntajes y el progreso del torneo se guardan en la memoria del navegador (`sessionStorage`) mientras la pestaña/ventana esté abierta. Si cierras el navegador o la pestaña, los datos se pierden (tal como se requiere). Si solo recargas la página sin cerrarla, el torneo continúa donde quedó.
+Los puntajes y el progreso del torneo se guardan en `localStorage`, así que sobreviven aunque se cierre la pestaña o el navegador por accidente, o si la computadora se reinicia. Los datos solo se borran al pulsar **"Reiniciar Torneo"** o **"Nuevo Torneo"**.
+
+## Deshacer última jugada
+
+Si el anfitrión hace clic en el equipo equivocado (por ejemplo, en "Adivina el Jugador" o "Penales"), el botón **"↩️ Deshacer última jugada"** (visible junto al marcador en vivo) resta los puntos de la última jugada registrada. Pide confirmación antes de aplicar el cambio.
 
 ## Estructura del proyecto
 

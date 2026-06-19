@@ -1,4 +1,5 @@
-// Estado global del torneo. Se guarda en sessionStorage (se mantiene mientras la pestaña/app esté abierta).
+// Estado global del torneo. Se guarda en localStorage para sobrevivir cierres accidentales
+// de la pestaña/navegador durante el evento; "Reiniciar Torneo" es la única forma de borrarlo.
 const Estado = (() => {
   const CLAVE = "diaDelPadreFutbol_estado_v1";
 
@@ -9,6 +10,7 @@ const Estado = (() => {
       preguntasUsadas: [], // índices de preguntas ya usadas en trivia
       palabrasMimicaUsadas: [], // palabras ya actuadas en "Mímica"
       historial: [], // log de eventos para depurar/mostrar
+      acciones: [], // pila de jugadas con puntos, para poder deshacer la última
     };
   }
 
@@ -16,15 +18,19 @@ const Estado = (() => {
 
   function cargar() {
     try {
-      const raw = sessionStorage.getItem(CLAVE);
-      if (raw) return JSON.parse(raw);
+      const raw = localStorage.getItem(CLAVE);
+      if (raw) {
+        const cargado = JSON.parse(raw);
+        if (!cargado.acciones) cargado.acciones = [];
+        return cargado;
+      }
     } catch (e) { /* ignorar */ }
     return vacio();
   }
 
   function guardar() {
     try {
-      sessionStorage.setItem(CLAVE, JSON.stringify(data));
+      localStorage.setItem(CLAVE, JSON.stringify(data));
     } catch (e) { /* ignorar */ }
   }
 
@@ -61,7 +67,24 @@ const Estado = (() => {
     if (!eq) return;
     eq.puntos += puntos;
     data.historial.push(`${eq.nombre} +${puntos} pts (${razon})`);
+    data.acciones.push({ equipoId: id, puntos, razon });
     guardar();
+  }
+
+  function ultimaAccion() {
+    return data.acciones.length ? data.acciones[data.acciones.length - 1] : null;
+  }
+
+  // Solo revierte los puntos otorgados; no vuelve a poner en juego la pregunta/jugador/
+  // palabra de esa jugada, ya que el uso esperado es corregir un clic equivocado al instante.
+  function deshacerUltima() {
+    const accion = data.acciones.pop();
+    if (!accion) return null;
+    const eq = obtenerEquipo(accion.equipoId);
+    if (eq) eq.puntos -= accion.puntos;
+    data.historial.pop();
+    guardar();
+    return accion;
   }
 
   function marcarPreguntaUsada(idx) {
@@ -105,6 +128,8 @@ const Estado = (() => {
     obtenerEquipos,
     obtenerEquipo,
     sumarPuntos,
+    ultimaAccion,
+    deshacerUltima,
     marcarPreguntaUsada,
     preguntasUsadas,
     marcarJugadorUsado,

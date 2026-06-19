@@ -32,6 +32,58 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // -------------------- Toasts de puntos --------------------
+  function mostrarToast(equipo, puntos) {
+    const cont = document.getElementById("toast-container");
+    const div = document.createElement("div");
+    div.className = "toast";
+    div.style.borderLeftColor = equipo.color;
+    div.textContent = `+${puntos} pts · ${equipo.nombre}`;
+    cont.appendChild(div);
+    setTimeout(() => div.remove(), 2000);
+  }
+
+  // -------------------- Badge de turno con color de equipo --------------------
+  function crearBadgeEquipo(equipo, emoji = "") {
+    const span = document.createElement("span");
+    span.className = "turno-equipo";
+    span.style.background = equipo.color;
+    span.textContent = emoji ? `${emoji} ${equipo.nombre}` : equipo.nombre;
+    return span;
+  }
+
+  // -------------------- Modo compacto (control desde celular) --------------------
+  const CLAVE_MODO_COMPACTO = "diaDelPadreFutbol_modoCompacto";
+  function aplicarModoCompacto(activo) {
+    document.body.classList.toggle("modo-compacto", activo);
+    document.getElementById("btn-modo-compacto").textContent =
+      activo ? "🖥️ Modo normal" : "📱 Modo compacto";
+  }
+  document.getElementById("btn-modo-compacto").addEventListener("click", () => {
+    const activo = !document.body.classList.contains("modo-compacto");
+    Sonidos.click();
+    aplicarModoCompacto(activo);
+    try { localStorage.setItem(CLAVE_MODO_COMPACTO, activo ? "1" : "0"); } catch (e) { /* ignorar */ }
+  });
+  try { aplicarModoCompacto(localStorage.getItem(CLAVE_MODO_COMPACTO) === "1"); } catch (e) { /* ignorar */ }
+
+  // -------------------- Deshacer última jugada --------------------
+  document.getElementById("btn-deshacer").addEventListener("click", () => {
+    const accion = Estado.ultimaAccion();
+    if (!accion) {
+      alert("No hay ninguna jugada para deshacer.");
+      return;
+    }
+    const equipo = Estado.obtenerEquipo(accion.equipoId);
+    const confirmado = confirm(
+      `¿Deshacer la última jugada?\nSe restarán ${accion.puntos} pts a ${equipo.nombre} (${accion.razon}).`
+    );
+    if (!confirmado) return;
+    Estado.deshacerUltima();
+    Sonidos.click();
+    renderMarcadorGlobal();
+  });
+
   // -------------------- Pantalla Inicio --------------------
   document.getElementById("btn-ir-registro").addEventListener("click", () => {
     Sonidos.click();
@@ -143,6 +195,12 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarPantalla("pantalla-tabla");
   });
 
+  document.getElementById("btn-menu-historial").addEventListener("click", () => {
+    Sonidos.click();
+    renderHistorial();
+    mostrarPantalla("pantalla-historial");
+  });
+
   document.getElementById("btn-finalizar-torneo").addEventListener("click", () => {
     mostrarPantallaGanador();
   });
@@ -195,6 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
   botonVolverMenu("btn-mimica-cancelar");
   botonVolverMenu("btn-mimica-volver");
   botonVolverMenu("btn-tabla-volver");
+  botonVolverMenu("btn-historial-volver");
   botonVolverMenu("btn-ganador-volver");
 
   document.getElementById("btn-jugador-cancelar").addEventListener("click", () => {
@@ -249,7 +308,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const pregunta = BANCO_TRIVIA[idxPregunta];
     const equipoTurno = Estado.obtenerEquipo(equipoTurnoTrivia());
 
-    document.getElementById("trivia-turno").textContent = `🎯 Turno de: ${equipoTurno.nombre}`;
+    const turnoDiv = document.getElementById("trivia-turno");
+    turnoDiv.innerHTML = "";
+    turnoDiv.append("🎯 Turno de: ", crearBadgeEquipo(equipoTurno));
     document.getElementById("trivia-contador").textContent =
       `Pregunta ${triviaRonda.indice + 1} de ${triviaRonda.preguntas.length}`;
     document.getElementById("trivia-pregunta").textContent = pregunta.pregunta;
@@ -276,6 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Estado.sumarPuntos(equipoId, PUNTOS_TRIVIA, "Trivia Mundialista");
       triviaRonda.puntosRonda[equipoId] += PUNTOS_TRIVIA;
       document.getElementById("trivia-resultado").textContent = `✅ ¡Correcto! ${equipo.nombre} suma ${PUNTOS_TRIVIA} puntos.`;
+      mostrarToast(equipo, PUNTOS_TRIVIA);
       Sonidos.correcto();
     } else {
       btnClickeado.classList.add("incorrecta");
@@ -309,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ==================== JUEGO 2: PENALES DE LA SUERTE ====================
   let penalesRonda = null;
-  const ZONAS = ["arriba-izquierda", "centro", "arriba-derecha", "abajo-izquierda", "abajo-derecha"];
+  const TOTAL_RONDAS_PENAL = 5;
 
   document.getElementById("btn-iniciar-penales").addEventListener("click", () => {
     const idA = parseInt(document.getElementById("penales-equipo-a").value, 10);
@@ -318,100 +380,175 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Selecciona dos equipos diferentes.");
       return;
     }
+    // Sorteo: quién dispara primero se decide al azar, y ese orden se mantiene toda la tanda (como en un shootout real).
+    const primero = Math.random() < 0.5 ? idA : idB;
+    const segundo = primero === idA ? idB : idA;
     penalesRonda = {
-      // fases: primero A dispara y B ataja (5 tiros), luego B dispara y A ataja (5 tiros)
-      fases: [
-        { tirador: idA, portero: idB, tiro: 0, goles: 0 },
-        { tirador: idB, portero: idA, tiro: 0, goles: 0 },
-      ],
-      faseActual: 0,
+      primero,
+      segundo,
+      ronda: 0,
+      turno: "primero", // "primero" o "segundo": quién dispara en este sub-turno
+      fase: "disparo", // "disparo" o "atajada"
       zonaDisparo: null,
+      resultados: { primero: [], segundo: [] }, // 'gol' | 'atajada'
     };
     document.getElementById("penales-seleccion").classList.add("oculto");
     document.getElementById("penales-juego").classList.remove("oculto");
     document.getElementById("penales-final").classList.add("oculto");
+    renderTablaPenales();
     iniciarTiroPenal();
   });
 
-  function faseActualPenal() {
-    return penalesRonda.fases[penalesRonda.faseActual];
+  function renderTablaPenales() {
+    const equipoPrimero = Estado.obtenerEquipo(penalesRonda.primero);
+    const equipoSegundo = Estado.obtenerEquipo(penalesRonda.segundo);
+    const tbody = document.querySelector("#tabla-penales tbody");
+    const filaHtml = (equipo, resultados) => {
+      let celdas = "";
+      for (let i = 0; i < TOTAL_RONDAS_PENAL; i++) {
+        const r = resultados[i];
+        let claseCelda = "celda-vacia";
+        let contenido = "";
+        if (r === "gol") {
+          claseCelda = "celda-gol";
+          contenido = "●";
+        } else if (r === "atajada") {
+          claseCelda = "celda-atajada";
+          contenido = "✕";
+        }
+        celdas += `<td class="celda-penal ${claseCelda}"><span>${contenido}</span></td>`;
+      }
+      return `<tr><th class="nombre-equipo-penal">${equipo.nombre}</th>${celdas}</tr>`;
+    };
+    tbody.innerHTML =
+      filaHtml(equipoPrimero, penalesRonda.resultados.primero) +
+      filaHtml(equipoSegundo, penalesRonda.resultados.segundo);
+  }
+
+  function tiradorActual() {
+    return penalesRonda.turno === "primero" ? penalesRonda.primero : penalesRonda.segundo;
+  }
+
+  function porteroActual() {
+    return penalesRonda.turno === "primero" ? penalesRonda.segundo : penalesRonda.primero;
   }
 
   function iniciarTiroPenal() {
     document.getElementById("penales-resultado").textContent = "";
-    const fase = faseActualPenal();
-    const tirador = Estado.obtenerEquipo(fase.tirador);
-    const portero = Estado.obtenerEquipo(fase.portero);
-    document.getElementById("penales-turno").textContent = `⚽ ${tirador.nombre} dispara — 🧤 ${portero.nombre} defiende`;
-    document.getElementById("penales-contador").textContent = `Tiro ${fase.tiro + 1} de 5`;
-    document.getElementById("penales-fase-disparo").classList.remove("oculto");
-    document.getElementById("penales-fase-atajada").classList.add("oculto");
-    habilitarZonas("penales-fase-disparo", true);
-    habilitarZonas("penales-fase-atajada", true);
+    document.getElementById("resultado-sello").className = "resultado-sello oculto";
+    penalesRonda.fase = "disparo";
+    penalesRonda.zonaDisparo = null;
+
+    const tirador = Estado.obtenerEquipo(tiradorActual());
+    const portero = Estado.obtenerEquipo(porteroActual());
+    const turnoDiv = document.getElementById("penales-turno");
+    turnoDiv.innerHTML = "";
+    turnoDiv.append(
+      crearBadgeEquipo(tirador, "⚽"),
+      " dispara — ",
+      crearBadgeEquipo(portero, "🧤"),
+      " defiende"
+    );
+    document.getElementById("penales-contador").textContent = `Penal ${penalesRonda.ronda + 1} de ${TOTAL_RONDAS_PENAL}`;
+    document.getElementById("instrucciones-penal").textContent = "⚽ El equipo atacante elige dónde disparar:";
+
+    const balon = document.getElementById("balon-anim");
+    const porteroEl = document.getElementById("portero-anim");
+    balon.className = "balon-anim";
+    porteroEl.className = "portero-anim";
+    habilitarZonas(true);
   }
 
-  function habilitarZonas(idContenedor, habilitar) {
-    document.querySelectorAll(`#${idContenedor} .zona`).forEach((z) => (z.disabled = !habilitar));
+  function habilitarZonas(habilitar) {
+    document.querySelectorAll("#porteria-penal .zona").forEach((z) => (z.disabled = !habilitar));
   }
 
-  document.querySelectorAll("#penales-fase-disparo .zona").forEach((btn) => {
+  document.querySelectorAll("#porteria-penal .zona").forEach((btn) => {
     btn.addEventListener("click", () => {
-      Sonidos.click();
-      penalesRonda.zonaDisparo = btn.dataset.zona;
-      habilitarZonas("penales-fase-disparo", false);
-      document.getElementById("penales-fase-disparo").classList.add("oculto");
-      document.getElementById("penales-fase-atajada").classList.remove("oculto");
-    });
-  });
-
-  document.querySelectorAll("#penales-fase-atajada .zona").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      habilitarZonas("penales-fase-atajada", false);
-      resolverTiroPenal(btn.dataset.zona);
+      if (penalesRonda.fase === "disparo") {
+        Sonidos.click();
+        penalesRonda.zonaDisparo = btn.dataset.zona;
+        penalesRonda.fase = "atajada";
+        document.getElementById("instrucciones-penal").textContent = "🧤 El equipo portero elige dónde atajar:";
+      } else if (penalesRonda.fase === "atajada") {
+        habilitarZonas(false);
+        resolverTiroPenal(btn.dataset.zona);
+      }
     });
   });
 
   function resolverTiroPenal(zonaAtajada) {
-    const fase = faseActualPenal();
-    const tirador = Estado.obtenerEquipo(fase.tirador);
-    const portero = Estado.obtenerEquipo(fase.portero);
+    const turno = penalesRonda.turno;
+    const tirador = Estado.obtenerEquipo(tiradorActual());
+    const portero = Estado.obtenerEquipo(porteroActual());
     const esGol = zonaAtajada !== penalesRonda.zonaDisparo;
     const resultadoDiv = document.getElementById("penales-resultado");
 
-    if (esGol) {
-      fase.goles++;
-      Estado.sumarPuntos(fase.tirador, PUNTOS_PENAL, "Penales de la Suerte");
-      resultadoDiv.textContent = `⚽🎉 ¡GOOOL de ${tirador.nombre}!`;
-      Sonidos.gol();
-    } else {
-      resultadoDiv.textContent = `🧤 ¡ATAJADA de ${portero.nombre}!`;
-      Sonidos.atajada();
-    }
-    renderMarcadorGlobal();
-    fase.tiro++;
+    const balon = document.getElementById("balon-anim");
+    const porteroEl = document.getElementById("portero-anim");
+    const sello = document.getElementById("resultado-sello");
+    balon.className = `balon-anim disparo-${penalesRonda.zonaDisparo}`;
+    porteroEl.className = `portero-anim atajada-${zonaAtajada}`;
 
     setTimeout(() => {
-      if (fase.tiro >= 5) {
-        penalesRonda.faseActual++;
-        if (penalesRonda.faseActual >= penalesRonda.fases.length) {
-          finalizarPenales();
-        } else {
-          iniciarTiroPenal();
-        }
+      penalesRonda.resultados[turno].push(esGol ? "gol" : "atajada");
+      renderTablaPenales();
+
+      const flash = document.getElementById("flash-pantalla");
+      const escenario = document.getElementById("escenario-penal");
+      if (esGol) {
+        balon.classList.add("balon-gol");
+        sello.textContent = "¡GOOOL!";
+        sello.className = "resultado-sello sello-gol";
+        Estado.sumarPuntos(tiradorActual(), PUNTOS_PENAL, "Penales de la Suerte");
+        resultadoDiv.textContent = `⚽🎉 ¡GOOOL de ${tirador.nombre}!`;
+        mostrarToast(tirador, PUNTOS_PENAL);
+        flash.className = "flash-pantalla flash-gol";
+        escenario.classList.add("shake");
+        Sonidos.gol();
       } else {
-        iniciarTiroPenal();
+        balon.classList.add("balon-atajado");
+        sello.textContent = "¡ATAJADA!";
+        sello.className = "resultado-sello sello-atajada";
+        resultadoDiv.textContent = `🧤 ¡ATAJADA de ${portero.nombre}!`;
+        flash.className = "flash-pantalla flash-atajada";
+        Sonidos.atajada();
       }
-    }, esGol ? 2200 : 1800);
+      setTimeout(() => {
+        flash.className = "flash-pantalla";
+        escenario.classList.remove("shake");
+      }, 500);
+      renderMarcadorGlobal();
+    }, 550);
+
+    setTimeout(() => {
+      avanzarTurnoPenal();
+    }, esGol ? 2600 : 2200);
+  }
+
+  function avanzarTurnoPenal() {
+    if (penalesRonda.turno === "primero") {
+      penalesRonda.turno = "segundo";
+    } else {
+      penalesRonda.turno = "primero";
+      penalesRonda.ronda++;
+    }
+    if (penalesRonda.ronda >= TOTAL_RONDAS_PENAL) {
+      finalizarPenales();
+    } else {
+      iniciarTiroPenal();
+    }
   }
 
   function finalizarPenales() {
     document.getElementById("penales-juego").classList.add("oculto");
     document.getElementById("penales-final").classList.remove("oculto");
-    const [fase1, fase2] = penalesRonda.fases;
-    const eq1 = Estado.obtenerEquipo(fase1.tirador);
-    const eq2 = Estado.obtenerEquipo(fase2.tirador);
+    const eq1 = Estado.obtenerEquipo(penalesRonda.primero);
+    const eq2 = Estado.obtenerEquipo(penalesRonda.segundo);
+    const goles1 = penalesRonda.resultados.primero.filter((r) => r === "gol").length;
+    const goles2 = penalesRonda.resultados.segundo.filter((r) => r === "gol").length;
     document.getElementById("penales-resumen").textContent =
-      `${eq1.nombre} anotó ${fase1.goles} de 5 penales. ${eq2.nombre} anotó ${fase2.goles} de 5 penales.`;
+      `${eq1.nombre} anotó ${goles1} de ${TOTAL_RONDAS_PENAL} penales. ${eq2.nombre} anotó ${goles2} de ${TOTAL_RONDAS_PENAL} penales.`;
   }
 
   // ==================== JUEGO 3: ADIVINA EL JUGADOR ====================
@@ -501,6 +638,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Estado.sumarPuntos(equipoId, puntos, "Adivina el Jugador");
     Estado.marcarJugadorUsado(jugadorActual.nombre);
     renderMarcadorGlobal();
+    mostrarToast(equipo, puntos);
     Sonidos.correcto();
     mostrarRevelado(`✅ ¡${equipo.nombre} adivinó! Era ${jugadorActual.nombre}. Gana ${puntos} puntos.`);
   }
@@ -536,6 +674,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let mimicaSegundosRestantes = DURACION_MIMICA;
   let mimicaIntervalo = null;
   let mimicaAciertos = 0;
+  let mimicaPausado = false;
 
   function difundirEstadoAdminMimica() {
     try {
@@ -561,7 +700,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const equipo = Estado.obtenerEquipo(equipoId);
     asignarNuevaPalabraMimica(equipoId);
 
-    document.getElementById("mimica-turno").textContent = `🎭 Actúa: ${equipo.nombre}`;
+    const turnoDiv = document.getElementById("mimica-turno");
+    turnoDiv.innerHTML = "";
+    turnoDiv.append("🎭 Actúa: ", crearBadgeEquipo(equipo));
     document.getElementById("mimica-seleccion").classList.add("oculto");
     document.getElementById("mimica-espera").classList.remove("oculto");
   });
@@ -569,19 +710,28 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-iniciar-cronometro").addEventListener("click", () => {
     const equipo = Estado.obtenerEquipo(mimicaActual.equipoId);
     mimicaAciertos = 0;
-    document.getElementById("mimica-turno-2").textContent = `🎭 Actúa: ${equipo.nombre}`;
+    mimicaPausado = false;
+    const turnoDiv2 = document.getElementById("mimica-turno-2");
+    turnoDiv2.innerHTML = "";
+    turnoDiv2.append("🎭 Actúa: ", crearBadgeEquipo(equipo));
     document.getElementById("mimica-espera").classList.add("oculto");
     document.getElementById("mimica-juego").classList.remove("oculto");
     document.getElementById("mimica-resultado").textContent = "";
     document.getElementById("mimica-contador-aciertos").textContent = "Palabras adivinadas: 0";
     document.getElementById("btn-mimica-acerto").disabled = false;
     document.getElementById("btn-mimica-pasar").disabled = false;
+    document.getElementById("btn-mimica-pausar").disabled = false;
+    document.getElementById("btn-mimica-pausar").textContent = "⏸️ Pausar";
     iniciarCronometroMimica();
   });
 
   function iniciarCronometroMimica() {
     mimicaSegundosRestantes = DURACION_MIMICA;
     actualizarVisualCronometro();
+    arrancarIntervaloMimica();
+  }
+
+  function arrancarIntervaloMimica() {
     mimicaIntervalo = setInterval(() => {
       mimicaSegundosRestantes--;
       actualizarVisualCronometro();
@@ -593,6 +743,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }, 1000);
   }
+
+  document.getElementById("btn-mimica-pausar").addEventListener("click", () => {
+    const btn = document.getElementById("btn-mimica-pausar");
+    mimicaPausado = !mimicaPausado;
+    Sonidos.click();
+    if (mimicaPausado) {
+      detenerCronometroMimica();
+      btn.textContent = "▶️ Reanudar";
+      document.getElementById("btn-mimica-acerto").disabled = true;
+      document.getElementById("btn-mimica-pasar").disabled = true;
+    } else {
+      btn.textContent = "⏸️ Pausar";
+      document.getElementById("btn-mimica-acerto").disabled = false;
+      document.getElementById("btn-mimica-pasar").disabled = false;
+      arrancarIntervaloMimica();
+    }
+  });
 
   function detenerCronometroMimica() {
     if (mimicaIntervalo) {
@@ -615,6 +782,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Estado.marcarPalabraMimicaUsada(mimicaActual.palabra);
     mimicaAciertos++;
     renderMarcadorGlobal();
+    mostrarToast(equipo, PUNTOS_MIMICA);
     Sonidos.correcto();
     document.getElementById("mimica-contador-aciertos").textContent = `Palabras adivinadas: ${mimicaAciertos}`;
     document.getElementById("mimica-resultado").textContent =
@@ -634,6 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Sonidos.finCronometro();
     document.getElementById("btn-mimica-acerto").disabled = true;
     document.getElementById("btn-mimica-pasar").disabled = true;
+    document.getElementById("btn-mimica-pausar").disabled = true;
     const equipo = Estado.obtenerEquipo(mimicaActual.equipoId);
     const puntosGanados = mimicaAciertos * PUNTOS_MIMICA;
     mimicaActual = null;
@@ -647,6 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-mimica-cancelar").addEventListener("click", () => {
     detenerCronometroMimica();
+    mimicaPausado = false;
     mimicaActual = null;
     difundirEstadoAdminMimica();
   });
@@ -671,6 +841,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function medallaPara(i) {
     return i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "⚽";
+  }
+
+  // ==================== HISTORIAL DE JUGADAS ====================
+  function renderHistorial() {
+    const cont = document.getElementById("historial-lista");
+    cont.innerHTML = "";
+    const historial = Estado.obtenerHistorial();
+    if (historial.length === 0) {
+      const p = document.createElement("p");
+      p.className = "instrucciones";
+      p.textContent = "Aún no hay jugadas registradas.";
+      cont.appendChild(p);
+      return;
+    }
+    [...historial].reverse().forEach((linea) => {
+      const div = document.createElement("div");
+      div.className = "historial-item";
+      div.textContent = linea;
+      cont.appendChild(div);
+    });
   }
 
   // ==================== PANTALLA GANADOR ====================
@@ -698,6 +888,10 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarPantalla("pantalla-ganador");
     Sonidos.ganador();
   }
+
+  document.getElementById("btn-imprimir-resultados").addEventListener("click", () => {
+    window.print();
+  });
 
   function generarConfeti() {
     const cont = document.getElementById("confeti");
