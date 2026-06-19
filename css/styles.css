@@ -1,0 +1,486 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Inter:wght@400;600;800&display=swap');
+
+:root {
+  --verde-cesped: #1e5631;
+  --verde-claro: #2a9d4a;
+  --dorado: #f4b400;
+  --azul: #1d3557;
+  --rojo: #e63946;
+  --crema: #fff8e7;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(circle at top, #2a9d4a 0%, #1e5631 60%, #123d20 100%);
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0 60px, transparent 60px 120px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+h1, h2, h3 {
+  font-family: 'Fredoka', sans-serif;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pantalla {
+  display: none;
+  width: 100%;
+  max-width: 1100px;
+  flex-direction: column;
+  align-items: center;
+  animation: aparecer 0.35s ease;
+}
+.pantalla.activa { display: flex; }
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.oculto { display: none !important; }
+
+/* ---------- Marcador global ---------- */
+.marcador-global {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 50;
+  background: linear-gradient(90deg, var(--azul), #0d1b2a);
+  border-bottom: 4px solid var(--dorado);
+  padding: 10px 20px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+}
+.marcador-titulo {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+  color: var(--dorado);
+  margin-bottom: 6px;
+}
+.marcador-lista {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+.marcador-item {
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 6px 16px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  border-left: 6px solid #fff;
+}
+
+/* ---------- Inicio ---------- */
+.contenedor-inicio {
+  text-align: center;
+  margin-top: 8vh;
+  padding: 40px;
+}
+.titulo-principal {
+  font-size: 3.4rem;
+  margin: 0;
+  text-shadow: 3px 3px 0 #0d3a1a;
+}
+.subtitulo {
+  color: var(--dorado);
+  font-size: 2.2rem;
+}
+.frase-inicio {
+  font-size: 1.4rem;
+  margin: 24px 0 40px;
+  color: var(--crema);
+}
+
+/* ---------- Botones ---------- */
+.btn {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  padding: 16px 26px;
+  font-size: 1.15rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+}
+.btn:hover { transform: translateY(-3px); }
+.btn:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+
+.btn-gigante {
+  font-size: 2rem;
+  padding: 26px 50px;
+  border-radius: 22px;
+}
+.btn-grande {
+  font-size: 1.4rem;
+  padding: 20px 36px;
+}
+.btn-secundario {
+  background: #e9ecef;
+  color: #1d3557;
+  font-size: 1.1rem;
+  padding: 14px 26px;
+}
+.btn-dorado { background: linear-gradient(180deg, #ffd54a, var(--dorado)); color: #3a2900; }
+.btn-verde { background: linear-gradient(180deg, #3fbf63, #2a9d4a); color: #fff; }
+.btn-peligro { background: linear-gradient(180deg, #ff6b6b, var(--rojo)); color: #fff; }
+.btn-volver { margin-top: 30px; }
+
+.botonera {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* ---------- Pantalla genérica ---------- */
+.titulo-pantalla {
+  font-size: 2.4rem;
+  margin-bottom: 6px;
+  text-align: center;
+  text-shadow: 2px 2px 0 #0d3a1a;
+}
+.instrucciones {
+  font-size: 1.2rem;
+  color: var(--crema);
+  text-align: center;
+  margin: 6px 0 20px;
+}
+
+/* ---------- Registro de equipos ---------- */
+.lista-equipos-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+}
+.fila-equipo {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.fila-equipo input {
+  flex: 1;
+  font-size: 1.2rem;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+}
+.fila-equipo .btn-quitar {
+  background: var(--rojo);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 800;
+}
+.mensaje-error {
+  color: #ffd6d6;
+  background: rgba(230,57,70,0.3);
+  padding: 10px 18px;
+  border-radius: 10px;
+  margin-top: 14px;
+  font-weight: 600;
+}
+
+/* ---------- Menú ---------- */
+.grid-menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  width: 100%;
+  max-width: 760px;
+  margin-bottom: 10px;
+}
+.btn-juego {
+  font-size: 1.5rem;
+  padding: 34px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+}
+.emoji-juego { font-size: 2.6rem; }
+.btn-trivia { background: linear-gradient(160deg, #4361ee, #1d3557); }
+.btn-penal { background: linear-gradient(160deg, #ff8c42, #d9480f); }
+.btn-adivina { background: linear-gradient(160deg, #7209b7, #480ca8); }
+.btn-tabla { background: linear-gradient(160deg, #06a77d, #04724d); }
+
+/* ---------- Selección de equipos / VS ---------- */
+.caja-seleccion {
+  background: rgba(0,0,0,0.2);
+  border-radius: 18px;
+  padding: 28px;
+  text-align: center;
+  width: 100%;
+  max-width: 640px;
+}
+.selects-equipos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.select-equipo {
+  font-size: 1.3rem;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+.vs {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.6rem;
+  color: var(--dorado);
+}
+
+/* ---------- Trivia / juego en curso ---------- */
+.caja-juego {
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+}
+.turno-actual {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--dorado);
+}
+.contador-pregunta {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  margin-bottom: 16px;
+}
+.pregunta-caja {
+  background: rgba(0,0,0,0.25);
+  border-radius: 18px;
+  padding: 30px;
+}
+.pregunta-texto {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.opciones-trivia {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.opcion-btn {
+  font-size: 1.2rem;
+  padding: 20px;
+  border-radius: 14px;
+  border: none;
+  background: #fff;
+  color: #1d3557;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.opcion-btn:hover { background: #ffe9a8; }
+.opcion-btn.correcta { background: #2a9d4a; color: #fff; }
+.opcion-btn.incorrecta { background: var(--rojo); color: #fff; }
+
+.resultado-feedback {
+  margin-top: 20px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  min-height: 1.8rem;
+}
+
+.caja-final {
+  text-align: center;
+  background: rgba(0,0,0,0.25);
+  border-radius: 18px;
+  padding: 36px;
+  max-width: 700px;
+}
+.caja-final h3 { font-size: 2rem; color: var(--dorado); }
+.caja-final p { font-size: 1.3rem; margin: 16px 0; }
+
+/* ---------- Penales ---------- */
+.fase-penal { margin-top: 10px; }
+.instrucciones-penal { font-size: 1.3rem; margin-bottom: 16px; }
+.porteria {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 14px;
+  background: repeating-linear-gradient(45deg, #f4f4f4 0 10px, #ffffff 10px 20px);
+  border: 8px solid #ddd;
+  border-radius: 8px;
+  padding: 22px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.zona {
+  font-size: 1.05rem;
+  font-weight: 800;
+  border: none;
+  border-radius: 10px;
+  background: rgba(29,53,87,0.85);
+  color: #fff;
+  padding: 22px 10px;
+  cursor: pointer;
+}
+.zona:hover { background: var(--rojo); transform: scale(1.04); }
+.zona-arriba-izq { grid-column: 1; grid-row: 1; }
+.zona-arriba-der { grid-column: 3; grid-row: 1; }
+.zona-centro { grid-column: 2; grid-row: 1 / span 2; background: rgba(244,180,0,0.85); color: #3a2900; }
+.zona-abajo-izq { grid-column: 1; grid-row: 2; }
+.zona-abajo-der { grid-column: 3; grid-row: 2; }
+
+/* ---------- Adivina el jugador ---------- */
+.puntos-disponibles {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--dorado);
+  margin-bottom: 10px;
+}
+.lista-pistas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+  text-align: left;
+  max-width: 600px;
+  margin-inline: auto;
+}
+.pista-item {
+  background: rgba(0,0,0,0.25);
+  border-left: 6px solid var(--dorado);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 1.25rem;
+}
+.botonera-equipos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  margin: 18px 0;
+}
+.btn-equipo-marcar {
+  font-size: 1.15rem;
+  padding: 16px 24px;
+  border-radius: 14px;
+  border: none;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: 'Fredoka', sans-serif;
+}
+
+/* ---------- Tabla de posiciones ---------- */
+.tabla-posiciones {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.fila-tabla {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 14px;
+  padding: 16px 22px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-left: 10px solid #fff;
+}
+.fila-tabla .posicion {
+  font-size: 1.6rem;
+  width: 40px;
+  color: var(--dorado);
+}
+.fila-tabla .nombre-equipo-tabla { flex: 1; }
+.fila-tabla .puntos-equipo-tabla { font-size: 1.5rem; }
+
+/* ---------- Ganador ---------- */
+.contenedor-ganador {
+  text-align: center;
+  margin-top: 6vh;
+  position: relative;
+  z-index: 2;
+}
+.titulo-ganador {
+  font-size: 3rem;
+  color: var(--dorado);
+  text-shadow: 3px 3px 0 #6e4d00;
+}
+.nombre-ganador {
+  font-size: 3.4rem;
+  margin: 10px 0;
+}
+.puntos-ganador {
+  font-size: 1.6rem;
+  margin-bottom: 26px;
+}
+.podio-completo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 500px;
+  margin: 0 auto 20px;
+}
+
+.confeti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.pieza-confeti {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 16px;
+  opacity: 0.9;
+  animation: caer linear infinite;
+}
+@keyframes caer {
+  to { transform: translateY(110vh) rotate(540deg); }
+}
+
+@media (max-width: 700px) {
+  .grid-menu { grid-template-columns: 1fr; }
+  .opciones-trivia { grid-template-columns: 1fr; }
+  .titulo-principal { font-size: 2.2rem; }
+}

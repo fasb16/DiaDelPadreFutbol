@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚽ Día del Padre - Torneo Futbolero ⚽</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header id="marcador-global" class="marcador-global oculto">
+  <div class="marcador-titulo">🏆 Marcador en Vivo 🏆</div>
+  <div id="marcador-lista" class="marcador-lista"></div>
+</header>
+
+<main id="app">
+
+  <!-- PANTALLA INICIO -->
+  <section id="pantalla-inicio" class="pantalla activa">
+    <div class="contenedor-inicio">
+      <h1 class="titulo-principal">⚽ Día del Padre ⚽<br><span class="subtitulo">Torneo Futbolero</span></h1>
+      <p class="frase-inicio">¡Goles, penales y trivia para celebrar a los papás más futboleros!</p>
+      <button class="btn btn-gigante btn-dorado" id="btn-ir-registro">🏁 Comenzar Torneo</button>
+    </div>
+  </section>
+
+  <!-- PANTALLA REGISTRO DE EQUIPOS -->
+  <section id="pantalla-registro" class="pantalla">
+    <h2 class="titulo-pantalla">📋 Registro de Equipos</h2>
+    <p class="instrucciones">Cada equipo debe tener 4 integrantes. Ingresa el nombre de cada equipo.</p>
+    <div id="lista-equipos-form" class="lista-equipos-form"></div>
+    <div class="botonera">
+      <button class="btn btn-secundario" id="btn-agregar-equipo">➕ Agregar equipo</button>
+      <button class="btn btn-grande btn-verde" id="btn-guardar-equipos">✅ Guardar y continuar</button>
+    </div>
+    <p id="error-registro" class="mensaje-error"></p>
+  </section>
+
+  <!-- PANTALLA MENU -->
+  <section id="pantalla-menu" class="pantalla">
+    <h2 class="titulo-pantalla">⚽ Elige un Juego ⚽</h2>
+    <div class="grid-menu">
+      <button class="btn btn-juego btn-trivia" id="btn-menu-trivia">
+        <span class="emoji-juego">🧠</span> Trivia Mundialista
+      </button>
+      <button class="btn btn-juego btn-penal" id="btn-menu-penales">
+        <span class="emoji-juego">🥅</span> Penales de la Suerte
+      </button>
+      <button class="btn btn-juego btn-adivina" id="btn-menu-jugador">
+        <span class="emoji-juego">🔎</span> Adivina el Jugador
+      </button>
+      <button class="btn btn-juego btn-tabla" id="btn-menu-tabla">
+        <span class="emoji-juego">📊</span> Tabla de Posiciones
+      </button>
+    </div>
+    <div class="botonera">
+      <button class="btn btn-grande btn-dorado" id="btn-finalizar-torneo">🏆 Finalizar Torneo</button>
+      <button class="btn btn-secundario btn-peligro" id="btn-reiniciar-torneo">🔄 Reiniciar Torneo</button>
+    </div>
+  </section>
+
+  <!-- PANTALLA TRIVIA -->
+  <section id="pantalla-trivia" class="pantalla">
+    <h2 class="titulo-pantalla">🧠 Trivia Mundialista</h2>
+
+    <div id="trivia-seleccion" class="caja-seleccion">
+      <p class="instrucciones">Selecciona los dos equipos que competirán:</p>
+      <div class="selects-equipos">
+        <select id="trivia-equipo-a" class="select-equipo"></select>
+        <span class="vs">VS</span>
+        <select id="trivia-equipo-b" class="select-equipo"></select>
+      </div>
+      <button class="btn btn-grande btn-verde" id="btn-iniciar-trivia">▶️ Iniciar Ronda</button>
+    </div>
+
+    <div id="trivia-juego" class="caja-juego oculto">
+      <div class="turno-actual" id="trivia-turno"></div>
+      <div class="contador-pregunta" id="trivia-contador"></div>
+      <div class="pregunta-caja">
+        <p id="trivia-pregunta" class="pregunta-texto"></p>
+        <div id="trivia-opciones" class="opciones-trivia"></div>
+      </div>
+      <div id="trivia-resultado" class="resultado-feedback"></div>
+    </div>
+
+    <div id="trivia-final" class="caja-final oculto">
+      <h3>🎉 ¡Ronda terminada! 🎉</h3>
+      <p id="trivia-resumen"></p>
+      <button class="btn btn-grande btn-dorado" id="btn-trivia-volver">⬅️ Volver al menú</button>
+    </div>
+
+    <button class="btn btn-secundario btn-volver" id="btn-trivia-cancelar">⬅️ Volver al menú</button>
+  </section>
+
+  <!-- PANTALLA PENALES -->
+  <section id="pantalla-penales" class="pantalla">
+    <h2 class="titulo-pantalla">🥅 Penales de la Suerte</h2>
+
+    <div id="penales-seleccion" class="caja-seleccion">
+      <p class="instrucciones">Selecciona los dos equipos que competirán:</p>
+      <div class="selects-equipos">
+        <select id="penales-equipo-a" class="select-equipo"></select>
+        <span class="vs">VS</span>
+        <select id="penales-equipo-b" class="select-equipo"></select>
+      </div>
+      <button class="btn btn-grande btn-verde" id="btn-iniciar-penales">▶️ Iniciar Tanda</button>
+    </div>
+
+    <div id="penales-juego" class="caja-juego oculto">
+      <div class="turno-actual" id="penales-turno"></div>
+      <div class="contador-pregunta" id="penales-contador"></div>
+
+      <div id="penales-fase-disparo" class="fase-penal">
+        <p class="instrucciones-penal">⚽ El equipo atacante elige dónde disparar:</p>
+        <div class="porteria">
+          <button class="zona zona-arriba-izq" data-zona="arriba-izquierda">↖️<br>Arriba Izq.</button>
+          <button class="zona zona-centro" data-zona="centro">⏺️<br>Centro</button>
+          <button class="zona zona-arriba-der" data-zona="arriba-derecha">↗️<br>Arriba Der.</button>
+          <button class="zona zona-abajo-izq" data-zona="abajo-izquierda">↙️<br>Abajo Izq.</button>
+          <button class="zona zona-abajo-der" data-zona="abajo-derecha">↘️<br>Abajo Der.</button>
+        </div>
+      </div>
+
+      <div id="penales-fase-atajada" class="fase-penal oculto">
+        <p class="instrucciones-penal">🧤 El equipo portero elige dónde atajar:</p>
+        <div class="porteria">
+          <button class="zona zona-arriba-izq" data-zona="arriba-izquierda">↖️<br>Arriba Izq.</button>
+          <button class="zona zona-centro" data-zona="centro">⏺️<br>Centro</button>
+          <button class="zona zona-arriba-der" data-zona="arriba-derecha">↗️<br>Arriba Der.</button>
+          <button class="zona zona-abajo-izq" data-zona="abajo-izquierda">↙️<br>Abajo Izq.</button>
+          <button class="zona zona-abajo-der" data-zona="abajo-derecha">↘️<br>Abajo Der.</button>
+        </div>
+      </div>
+
+      <div id="penales-resultado" class="resultado-feedback"></div>
+    </div>
+
+    <div id="penales-final" class="caja-final oculto">
+      <h3>🎉 ¡Tanda terminada! 🎉</h3>
+      <p id="penales-resumen"></p>
+      <button class="btn btn-grande btn-dorado" id="btn-penales-volver">⬅️ Volver al menú</button>
+    </div>
+
+    <button class="btn btn-secundario btn-volver" id="btn-penales-cancelar">⬅️ Volver al menú</button>
+  </section>
+
+  <!-- PANTALLA ADIVINA EL JUGADOR -->
+  <section id="pantalla-jugador" class="pantalla">
+    <h2 class="titulo-pantalla">🔎 Adivina el Jugador</h2>
+
+    <div id="jugador-inicio" class="caja-seleccion">
+      <p class="instrucciones">Cualquier equipo puede responder. ¡Entre menos pistas, más puntos!</p>
+      <button class="btn btn-grande btn-verde" id="btn-iniciar-jugador">▶️ Mostrar Jugador</button>
+    </div>
+
+    <div id="jugador-juego" class="caja-juego oculto">
+      <div class="puntos-disponibles" id="jugador-puntos-disponibles"></div>
+      <div id="jugador-pistas" class="lista-pistas"></div>
+      <button class="btn btn-secundario" id="btn-siguiente-pista">➡️ Mostrar siguiente pista</button>
+
+      <p class="instrucciones">¿Qué equipo adivinó correctamente?</p>
+      <div id="jugador-botones-equipos" class="botonera-equipos"></div>
+      <button class="btn btn-secundario btn-peligro" id="btn-nadie-adivino">❌ Nadie adivinó / Revelar</button>
+
+      <div id="jugador-revelado" class="resultado-feedback oculto"></div>
+    </div>
+
+    <button class="btn btn-secundario btn-volver" id="btn-jugador-cancelar">⬅️ Volver al menú</button>
+  </section>
+
+  <!-- PANTALLA TABLA DE POSICIONES -->
+  <section id="pantalla-tabla" class="pantalla">
+    <h2 class="titulo-pantalla">📊 Tabla de Posiciones</h2>
+    <div id="tabla-posiciones" class="tabla-posiciones"></div>
+    <button class="btn btn-secundario btn-volver" id="btn-tabla-volver">⬅️ Volver al menú</button>
+  </section>
+
+  <!-- PANTALLA GANADOR -->
+  <section id="pantalla-ganador" class="pantalla">
+    <div class="confeti" id="confeti"></div>
+    <div class="contenedor-ganador">
+      <h1 class="titulo-ganador">🏆 ¡FELICIDADES! 🏆</h1>
+      <h2 id="nombre-ganador" class="nombre-ganador"></h2>
+      <p id="puntos-ganador" class="puntos-ganador"></p>
+      <div id="podio-completo" class="podio-completo"></div>
+      <div class="botonera">
+        <button class="btn btn-grande btn-dorado" id="btn-ganador-volver">⬅️ Volver al menú</button>
+        <button class="btn btn-secundario btn-peligro" id="btn-ganador-reiniciar">🔄 Nuevo Torneo</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/data-trivia.js"></script>
+<script src="js/data-players.js"></script>
+<script src="js/sounds.js"></script>
+<script src="js/state.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
