@@ -63,24 +63,58 @@
     font-size: 0.85rem;
     opacity: 0.6;
     padding-top: 30px;
+    text-align: center;
+  }
+  .seccion {
+    width: 100%;
+    max-width: 460px;
+    border-top: 2px solid rgba(255,255,255,0.15);
+    padding-top: 18px;
+    margin-top: 18px;
+  }
+  .seccion h2 {
+    font-size: 1rem;
+    color: #f4b400;
+    text-align: center;
+    margin: 0 0 10px;
+  }
+  .palabra-mimica {
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    color: #ff5d8f;
+    margin: 10px 0;
   }
 </style>
 </head>
 <body>
   <div class="aviso">⚠️ NO proyectes esta ventana — solo para el anfitrión</div>
   <h1>🛡️ VISTA DE ADMINISTRADOR</h1>
-  <div id="contenido">
-    <p class="vacio">Esperando a que se muestre un jugador en "Adivina el Jugador"...</p>
+
+  <div class="seccion">
+    <h2>🔎 Adivina el Jugador</h2>
+    <div id="contenido-jugador">
+      <p class="vacio">Esperando a que se muestre un jugador...</p>
+    </div>
   </div>
+
+  <div class="seccion">
+    <h2>🎭 Mímica de Acciones</h2>
+    <div id="contenido-mimica">
+      <p class="vacio">Esperando a que se asigne una palabra...</p>
+    </div>
+  </div>
+
   <p class="estado-conexion" id="estado-conexion"></p>
 
 <script>
-  const CLAVE_ADMIN = "diaDelPadreFutbol_adminJugador_v1";
+  const CLAVE_ADMIN_JUGADOR = "diaDelPadreFutbol_adminJugador_v1";
+  const CLAVE_ADMIN_MIMICA = "diaDelPadreFutbol_adminMimica_v1";
 
-  function render(data) {
-    const cont = document.getElementById("contenido");
+  function renderJugador(data) {
+    const cont = document.getElementById("contenido-jugador");
     if (!data || !data.nombre) {
-      cont.innerHTML = '<p class="vacio">Esperando a que se muestre un jugador en "Adivina el Jugador"...</p>';
+      cont.innerHTML = '<p class="vacio">Esperando a que se muestre un jugador...</p>';
       return;
     }
     const pistasHtml = data.pistas.map((p, i) => {
@@ -94,25 +128,39 @@
     `;
   }
 
-  function leerEstado() {
+  function renderMimica(data) {
+    const cont = document.getElementById("contenido-mimica");
+    if (!data || !data.palabra) {
+      cont.innerHTML = '<p class="vacio">Esperando a que se asigne una palabra...</p>';
+      return;
+    }
+    cont.innerHTML = `<div class="palabra-mimica">${data.palabra}</div>`;
+  }
+
+  function leerClave(clave) {
     try {
-      const raw = localStorage.getItem(CLAVE_ADMIN);
+      const raw = localStorage.getItem(clave);
       return raw ? JSON.parse(raw) : null;
     } catch (e) {
       return null;
     }
   }
 
-  render(leerEstado());
+  function actualizarTodo() {
+    renderJugador(leerClave(CLAVE_ADMIN_JUGADOR));
+    renderMimica(leerClave(CLAVE_ADMIN_MIMICA));
+  }
+
+  actualizarTodo();
 
   window.addEventListener("storage", (e) => {
-    if (e.key === CLAVE_ADMIN) {
-      render(leerEstado());
+    if (e.key === CLAVE_ADMIN_JUGADOR || e.key === CLAVE_ADMIN_MIMICA) {
+      actualizarTodo();
     }
   });
 
   // Respaldo: si el navegador no dispara "storage" entre ventanas (poco común), se reintenta cada segundo.
-  setInterval(() => render(leerEstado()), 1000);
+  setInterval(actualizarTodo, 1000);
 
   document.getElementById("estado-conexion").textContent =
     "Esta ventana se actualiza automáticamente. Mantenla en tu pantalla, fuera de la vista del público.";

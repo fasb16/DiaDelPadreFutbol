@@ -1,6 +1,6 @@
 # ⚽ Día del Padre - Torneo Futbolero
 
-Aplicación web para organizar una actividad presencial del Día del Padre con temática de fútbol. Administra equipos de 4 personas, puntuación automática y tres minijuegos: **Trivia Mundialista**, **Penales de la Suerte** y **Adivina el Jugador**.
+Aplicación web para organizar una actividad presencial del Día del Padre con temática de fútbol. Administra equipos de 4 personas, puntuación automática y cuatro minijuegos: **Trivia Mundialista**, **Penales de la Suerte**, **Adivina el Jugador** y **Mímica de Acciones**.
 
 No requiere internet, servidor, ni instalación de dependencias. Funciona con HTML, CSS y JavaScript puro directamente en el navegador.
 
@@ -53,9 +53,18 @@ El marcador en vivo de todos los equipos se muestra fijo en la parte superior du
 
 #### 🛡️ Vista de Administrador (para que tú sepas quién es el jugador)
 Como las pistas se muestran en la misma pantalla que ve el público, normalmente tú tampoco sabrías el nombre hasta revelarlo. Para resolver esto:
-- En la pantalla de "Adivina el Jugador" pulsa **"🛡️ Abrir Vista de Administrador"**. Se abrirá una ventana nueva (`admin.html`) que siempre muestra el nombre completo del jugador actual y todas sus pistas, sincronizada en tiempo real con el juego.
+- En la pantalla de "Adivina el Jugador" (o en "Mímica de Acciones") pulsa **"🛡️ Abrir Vista de Administrador"**. Se abrirá una ventana nueva (`admin.html`) que siempre muestra el nombre completo del jugador actual y todas sus pistas (o la palabra secreta de mímica), sincronizada en tiempo real con el juego.
 - **Importante:** esa ventana NO debe proyectarse. Si tu computadora está en modo "duplicar pantalla" (mirror), todo lo que ves tú también lo ve el público — en ese caso, simplemente consulta esa ventana en momentos discretos (por ejemplo, minimízala y solo ábrela un instante cuando un equipo grite una respuesta) o, mejor aún, configura tu computadora en modo "extender pantalla" (no duplicar) y arrastra la ventana de administrador a tu pantalla, dejando solo la ventana principal del juego en el proyector.
-- Alternativa sin tecnología: imprime la lista de los 50 jugadores (`js/data-players.js`) como una hoja de referencia física para el anfitrión.
+- Alternativa sin tecnología: imprime la lista de los 50 jugadores (`js/data-players.js`) o el banco de acciones (`js/data-mimica.js`) como una hoja de referencia física para el anfitrión.
+
+### 6. Mímica de Acciones 🎭
+- Selecciona el equipo que va a actuar y pulsa **"🎲 Asignar Palabra Secreta"**.
+- La palabra (una acción cotidiana, ej. "Pasear a la mascota", "Viendo televisión") se asigna en secreto — **solo aparece en la Vista de Administrador**, nunca en la pantalla pública.
+- El actor del equipo se acerca a ver la Vista de Administrador (sin que el público la vea), y cuando esté listo, el anfitrión pulsa **"▶️ Iniciar Cronómetro (45s)"**.
+- El actor representa la acción sin hablar mientras su equipo adivina contra el reloj.
+- Mientras más tiempo quede al adivinar, más puntos se ganan:
+  - 30s o más restantes: 20 pts · 15-29s restantes: 15 pts · 1-14s restantes: 10 pts · tiempo agotado: 0 pts
+- Banco de más de 75 acciones distintas para actuar.
 
 ## Efectos de sonido
 
@@ -75,9 +84,11 @@ DiaDelPadreFutbol/
 ├── js/
 │   ├── data-trivia.js      # Banco de 100+ preguntas de trivia
 │   ├── data-players.js     # Banco de 50 jugadores históricos con pistas
+│   ├── data-mimica.js      # Banco de acciones para Mímica
 │   ├── sounds.js           # Efectos de sonido sintetizados
 │   ├── state.js            # Estado del torneo y persistencia
-│   └── app.js              # Lógica de navegación y de los 3 juegos
+│   └── app.js              # Lógica de navegación y de los 4 juegos
+├── admin.html               # Vista privada del anfitrión (jugador/palabra secreta)
 └── README.md
 ```
 

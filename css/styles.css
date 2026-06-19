@@ -227,10 +227,10 @@ h1, h2, h3 {
 /* ---------- Menú ---------- */
 .grid-menu {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 22px;
   width: 100%;
-  max-width: 760px;
+  max-width: 900px;
   margin-bottom: 10px;
 }
 .btn-juego {
@@ -246,6 +246,7 @@ h1, h2, h3 {
 .btn-trivia { background: linear-gradient(160deg, #4361ee, #1d3557); }
 .btn-penal { background: linear-gradient(160deg, #ff8c42, #d9480f); }
 .btn-adivina { background: linear-gradient(160deg, #7209b7, #480ca8); }
+.btn-mimica { background: linear-gradient(160deg, #ff5d8f, #c9184a); }
 .btn-tabla { background: linear-gradient(160deg, #06a77d, #04724d); }
 
 /* ---------- Selección de equipos / VS ---------- */
@@ -374,6 +375,24 @@ h1, h2, h3 {
 .zona-centro { grid-column: 2; grid-row: 1 / span 2; background: rgba(244,180,0,0.85); color: #3a2900; }
 .zona-abajo-izq { grid-column: 1; grid-row: 2; }
 .zona-abajo-der { grid-column: 3; grid-row: 2; }
+
+/* ---------- Mímica ---------- */
+.cronometro {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 7rem;
+  font-weight: 700;
+  color: var(--dorado);
+  text-shadow: 4px 4px 0 #6e4d00;
+  margin: 10px 0 26px;
+}
+.cronometro.urgente {
+  color: var(--rojo);
+  animation: pulso 0.5s infinite;
+}
+@keyframes pulso {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
 
 /* ---------- Adivina el jugador ---------- */
 .puntos-disponibles {

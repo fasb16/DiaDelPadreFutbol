@@ -7,6 +7,7 @@ const Estado = (() => {
       equipos: [], // { id, nombre, color, puntos }
       jugadoresUsados: [], // nombres de jugadores ya usados en "Adivina el Jugador"
       preguntasUsadas: [], // índices de preguntas ya usadas en trivia
+      palabrasMimicaUsadas: [], // palabras ya actuadas en "Mímica"
       historial: [], // log de eventos para depurar/mostrar
     };
   }
@@ -42,6 +43,7 @@ const Estado = (() => {
     }));
     data.jugadoresUsados = [];
     data.preguntasUsadas = [];
+    data.palabrasMimicaUsadas = [];
     data.historial = [];
     guardar();
   }
@@ -80,6 +82,15 @@ const Estado = (() => {
     return data.jugadoresUsados;
   }
 
+  function marcarPalabraMimicaUsada(palabra) {
+    data.palabrasMimicaUsadas.push(palabra);
+    guardar();
+  }
+
+  function palabrasMimicaUsadas() {
+    return data.palabrasMimicaUsadas;
+  }
+
   function obtenerHistorial() {
     return data.historial;
   }
@@ -98,6 +109,8 @@ const Estado = (() => {
     preguntasUsadas,
     marcarJugadorUsado,
     jugadoresUsados,
+    marcarPalabraMimicaUsada,
+    palabrasMimicaUsadas,
     obtenerHistorial,
     hayEquipos,
   };

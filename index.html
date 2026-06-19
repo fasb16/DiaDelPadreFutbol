@@ -49,6 +49,9 @@
       <button class="btn btn-juego btn-adivina" id="btn-menu-jugador">
         <span class="emoji-juego">🔎</span> Adivina el Jugador
       </button>
+      <button class="btn btn-juego btn-mimica" id="btn-menu-mimica">
+        <span class="emoji-juego">🎭</span> Mímica de Acciones
+      </button>
       <button class="btn btn-juego btn-tabla" id="btn-menu-tabla">
         <span class="emoji-juego">📊</span> Tabla de Posiciones
       </button>
@@ -144,6 +147,42 @@
     <button class="btn btn-secundario btn-volver" id="btn-penales-cancelar">⬅️ Volver al menú</button>
   </section>
 
+  <!-- PANTALLA MÍMICA -->
+  <section id="pantalla-mimica" class="pantalla">
+    <h2 class="titulo-pantalla">🎭 Mímica de Acciones</h2>
+
+    <div id="mimica-seleccion" class="caja-seleccion">
+      <p class="instrucciones">Selecciona el equipo que va a actuar:</p>
+      <select id="mimica-equipo" class="select-equipo"></select>
+      <p class="instrucciones aviso-admin">📌 Abre la <strong>Vista de Administrador</strong> para que solo el actor del equipo vea la palabra secreta (sin que el público la vea).</p>
+      <button class="btn btn-secundario btn-abrir-admin">🛡️ Abrir Vista de Administrador</button>
+      <button class="btn btn-grande btn-verde" id="btn-asignar-palabra">🎲 Asignar Palabra Secreta</button>
+    </div>
+
+    <div id="mimica-espera" class="caja-juego oculto">
+      <div class="turno-actual" id="mimica-turno"></div>
+      <p class="instrucciones">🤫 La palabra secreta ya está en la Vista de Administrador. Cuando el actor esté listo, inicia el cronómetro.</p>
+      <button class="btn btn-grande btn-dorado" id="btn-iniciar-cronometro">▶️ Iniciar Cronómetro (45s)</button>
+    </div>
+
+    <div id="mimica-juego" class="caja-juego oculto">
+      <div class="turno-actual" id="mimica-turno-2"></div>
+      <div id="mimica-cronometro" class="cronometro">45</div>
+      <div class="botonera">
+        <button class="btn btn-grande btn-verde" id="btn-mimica-acerto">✅ ¡Equipo Adivinó!</button>
+      </div>
+      <div id="mimica-resultado" class="resultado-feedback"></div>
+    </div>
+
+    <div id="mimica-final" class="caja-final oculto">
+      <h3 id="mimica-final-titulo"></h3>
+      <p id="mimica-final-resumen"></p>
+      <button class="btn btn-grande btn-dorado" id="btn-mimica-volver">⬅️ Volver al menú</button>
+    </div>
+
+    <button class="btn btn-secundario btn-volver" id="btn-mimica-cancelar">⬅️ Volver al menú</button>
+  </section>
+
   <!-- PANTALLA ADIVINA EL JUGADOR -->
   <section id="pantalla-jugador" class="pantalla">
     <h2 class="titulo-pantalla">🔎 Adivina el Jugador</h2>
@@ -197,6 +236,7 @@
 
 <script src="js/data-trivia.js"></script>
 <script src="js/data-players.js"></script>
+<script src="js/data-mimica.js"></script>
 <script src="js/sounds.js"></script>
 <script src="js/state.js"></script>
 <script src="js/app.js"></script>

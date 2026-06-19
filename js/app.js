@@ -127,6 +127,16 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarPantalla("pantalla-jugador");
   });
 
+  document.getElementById("btn-menu-mimica").addEventListener("click", () => {
+    Sonidos.click();
+    prepararSeleccionEquipoUnico("mimica-equipo");
+    document.getElementById("mimica-seleccion").classList.remove("oculto");
+    document.getElementById("mimica-espera").classList.add("oculto");
+    document.getElementById("mimica-juego").classList.add("oculto");
+    document.getElementById("mimica-final").classList.add("oculto");
+    mostrarPantalla("pantalla-mimica");
+  });
+
   document.getElementById("btn-menu-tabla").addEventListener("click", () => {
     Sonidos.click();
     renderTablaPosiciones();
@@ -164,6 +174,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (equipos.length > 1) selB.selectedIndex = 1;
   }
 
+  function prepararSeleccionEquipoUnico(idSelect) {
+    const equipos = Estado.obtenerEquipos();
+    const sel = document.getElementById(idSelect);
+    sel.innerHTML = "";
+    equipos.forEach((eq) => sel.add(new Option(eq.nombre, eq.id)));
+  }
+
   function botonVolverMenu(idBoton) {
     document.getElementById(idBoton).addEventListener("click", () => {
       Sonidos.click();
@@ -175,6 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
   botonVolverMenu("btn-penales-cancelar");
   botonVolverMenu("btn-penales-volver");
   botonVolverMenu("btn-jugador-cancelar");
+  botonVolverMenu("btn-mimica-cancelar");
+  botonVolverMenu("btn-mimica-volver");
   botonVolverMenu("btn-tabla-volver");
   botonVolverMenu("btn-ganador-volver");
 
@@ -507,6 +526,117 @@ document.addEventListener("DOMContentLoaded", () => {
       iniciarNuevoJugador();
     }, 3200);
   }
+
+  // ==================== JUEGO 4: MÍMICA DE ACCIONES ====================
+  const DURACION_MIMICA = 45; // segundos
+  const CLAVE_ADMIN_MIMICA = "diaDelPadreFutbol_adminMimica_v1";
+
+  let mimicaActual = null; // { equipoId, palabra }
+  let mimicaSegundosRestantes = DURACION_MIMICA;
+  let mimicaIntervalo = null;
+
+  function difundirEstadoAdminMimica() {
+    try {
+      const payload = mimicaActual ? { palabra: mimicaActual.palabra } : { palabra: null };
+      localStorage.setItem(CLAVE_ADMIN_MIMICA, JSON.stringify({ ...payload, ts: Date.now() }));
+    } catch (e) { /* ignorar si localStorage no está disponible */ }
+  }
+
+  function obtenerPalabraMimicaAleatoria() {
+    const usadas = new Set(Estado.palabrasMimicaUsadas());
+    let disponibles = BANCO_MIMICA.filter((p) => !usadas.has(p));
+    if (disponibles.length === 0) disponibles = BANCO_MIMICA;
+    return disponibles[Math.floor(Math.random() * disponibles.length)];
+  }
+
+  document.getElementById("btn-asignar-palabra").addEventListener("click", () => {
+    const equipoId = parseInt(document.getElementById("mimica-equipo").value, 10);
+    const equipo = Estado.obtenerEquipo(equipoId);
+    mimicaActual = { equipoId, palabra: obtenerPalabraMimicaAleatoria() };
+    difundirEstadoAdminMimica();
+
+    document.getElementById("mimica-turno").textContent = `🎭 Actúa: ${equipo.nombre}`;
+    document.getElementById("mimica-seleccion").classList.add("oculto");
+    document.getElementById("mimica-espera").classList.remove("oculto");
+  });
+
+  document.getElementById("btn-iniciar-cronometro").addEventListener("click", () => {
+    const equipo = Estado.obtenerEquipo(mimicaActual.equipoId);
+    document.getElementById("mimica-turno-2").textContent = `🎭 Actúa: ${equipo.nombre}`;
+    document.getElementById("mimica-espera").classList.add("oculto");
+    document.getElementById("mimica-juego").classList.remove("oculto");
+    document.getElementById("mimica-resultado").textContent = "";
+    document.getElementById("btn-mimica-acerto").disabled = false;
+    iniciarCronometroMimica();
+  });
+
+  function iniciarCronometroMimica() {
+    mimicaSegundosRestantes = DURACION_MIMICA;
+    actualizarVisualCronometro();
+    mimicaIntervalo = setInterval(() => {
+      mimicaSegundosRestantes--;
+      actualizarVisualCronometro();
+      if (mimicaSegundosRestantes <= 5 && mimicaSegundosRestantes > 0) {
+        Sonidos.tic();
+      }
+      if (mimicaSegundosRestantes <= 0) {
+        detenerCronometroMimica();
+        Sonidos.finCronometro();
+        document.getElementById("btn-mimica-acerto").disabled = true;
+        document.getElementById("mimica-resultado").textContent = `⏱️ ¡Se acabó el tiempo! La acción era: "${mimicaActual.palabra}".`;
+        Estado.marcarPalabraMimicaUsada(mimicaActual.palabra);
+        setTimeout(finalizarTurnoMimica, 2800);
+      }
+    }, 1000);
+  }
+
+  function detenerCronometroMimica() {
+    if (mimicaIntervalo) {
+      clearInterval(mimicaIntervalo);
+      mimicaIntervalo = null;
+    }
+  }
+
+  function actualizarVisualCronometro() {
+    const cronoDiv = document.getElementById("mimica-cronometro");
+    cronoDiv.textContent = mimicaSegundosRestantes;
+    cronoDiv.classList.toggle("urgente", mimicaSegundosRestantes <= 10);
+  }
+
+  function puntosPorTiempoRestante(segundos) {
+    if (segundos >= 30) return 20;
+    if (segundos >= 15) return 15;
+    return 10;
+  }
+
+  document.getElementById("btn-mimica-acerto").addEventListener("click", () => {
+    detenerCronometroMimica();
+    document.getElementById("btn-mimica-acerto").disabled = true;
+    const equipo = Estado.obtenerEquipo(mimicaActual.equipoId);
+    const puntos = puntosPorTiempoRestante(mimicaSegundosRestantes);
+    Estado.sumarPuntos(mimicaActual.equipoId, puntos, "Mímica de Acciones");
+    Estado.marcarPalabraMimicaUsada(mimicaActual.palabra);
+    renderMarcadorGlobal();
+    Sonidos.correcto();
+    document.getElementById("mimica-resultado").textContent =
+      `✅ ¡${equipo.nombre} adivinó "${mimicaActual.palabra}"! Gana ${puntos} puntos (quedaban ${mimicaSegundosRestantes}s).`;
+    setTimeout(finalizarTurnoMimica, 2800);
+  });
+
+  function finalizarTurnoMimica() {
+    mimicaActual = null;
+    difundirEstadoAdminMimica();
+    document.getElementById("mimica-juego").classList.add("oculto");
+    document.getElementById("mimica-final").classList.remove("oculto");
+    document.getElementById("mimica-final-titulo").textContent = "🎉 ¡Turno terminado! 🎉";
+    document.getElementById("mimica-final-resumen").textContent = "Vuelve a entrar a este juego para asignarle un turno a otro equipo.";
+  }
+
+  document.getElementById("btn-mimica-cancelar").addEventListener("click", () => {
+    detenerCronometroMimica();
+    mimicaActual = null;
+    difundirEstadoAdminMimica();
+  });
 
   // ==================== TABLA DE POSICIONES ====================
   function renderTablaPosiciones() {

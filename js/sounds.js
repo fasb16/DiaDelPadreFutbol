@@ -78,11 +78,20 @@ const Sonidos = (() => {
     tono(200, 0.3, "sawtooth", 0, 0.25);
   }
 
+  function tic() {
+    tono(900, 0.08, "square", 0, 0.18);
+  }
+
+  function finCronometro() {
+    tono(300, 0.12, "sawtooth", 0, 0.3);
+    tono(220, 0.4, "sawtooth", 0.12, 0.3);
+  }
+
   function ganador() {
     const notas = [523, 523, 523, 659, 784, 1047, 784, 1047];
     notas.forEach((f, i) => tono(f, 0.3, "triangle", i * 0.18, 0.35));
     setTimeout(celebracion, notas.length * 180);
   }
 
-  return { gol, celebracion, atajada, click, correcto, incorrecto, ganador, ruidoSilbato };
+  return { gol, celebracion, atajada, click, correcto, incorrecto, ganador, ruidoSilbato, tic, finCronometro };
 })();
