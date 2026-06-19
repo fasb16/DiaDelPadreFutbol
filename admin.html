@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>🛡️ Vista de Administrador</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    background: #0d1b2a;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+  }
+  .aviso {
+    background: #e63946;
+    color: #fff;
+    font-weight: 800;
+    padding: 10px 18px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 1.2rem;
+    color: #f4b400;
+    margin-bottom: 4px;
+  }
+  .nombre {
+    font-size: 2.4rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 16px 0;
+    color: #2a9d4a;
+  }
+  .vacio {
+    font-size: 1.3rem;
+    opacity: 0.7;
+    margin-top: 40px;
+    text-align: center;
+  }
+  .pistas {
+    width: 100%;
+    max-width: 420px;
+  }
+  .pista {
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 1.05rem;
+    background: rgba(255,255,255,0.06);
+    border-left: 5px solid #444;
+  }
+  .pista.revelada {
+    border-left-color: #f4b400;
+    background: rgba(244,180,0,0.12);
+  }
+  .estado-conexion {
+    margin-top: auto;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    padding-top: 30px;
+  }
+</style>
+</head>
+<body>
+  <div class="aviso">⚠️ NO proyectes esta ventana — solo para el anfitrión</div>
+  <h1>🛡️ VISTA DE ADMINISTRADOR</h1>
+  <div id="contenido">
+    <p class="vacio">Esperando a que se muestre un jugador en "Adivina el Jugador"...</p>
+  </div>
+  <p class="estado-conexion" id="estado-conexion"></p>
+
+<script>
+  const CLAVE_ADMIN = "diaDelPadreFutbol_adminJugador_v1";
+
+  function render(data) {
+    const cont = document.getElementById("contenido");
+    if (!data || !data.nombre) {
+      cont.innerHTML = '<p class="vacio">Esperando a que se muestre un jugador en "Adivina el Jugador"...</p>';
+      return;
+    }
+    const pistasHtml = data.pistas.map((p, i) => {
+      const revelada = i < data.pistasMostradas;
+      return `<div class="pista ${revelada ? "revelada" : ""}">${revelada ? "✅" : "⬜"} Pista ${i + 1}: ${p}</div>`;
+    }).join("");
+    cont.innerHTML = `
+      <div class="nombre">${data.nombre}</div>
+      <p style="text-align:center;">Pistas reveladas al público: ${data.pistasMostradas} de ${data.pistas.length}</p>
+      <div class="pistas">${pistasHtml}</div>
+    `;
+  }
+
+  function leerEstado() {
+    try {
+      const raw = localStorage.getItem(CLAVE_ADMIN);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  render(leerEstado());
+
+  window.addEventListener("storage", (e) => {
+    if (e.key === CLAVE_ADMIN) {
+      render(leerEstado());
+    }
+  });
+
+  // Respaldo: si el navegador no dispara "storage" entre ventanas (poco común), se reintenta cada segundo.
+  setInterval(() => render(leerEstado()), 1000);
+
+  document.getElementById("estado-conexion").textContent =
+    "Esta ventana se actualiza automáticamente. Mantenla en tu pantalla, fuera de la vista del público.";
+</script>
+</body>
+</html>

@@ -51,6 +51,12 @@ El marcador en vivo de todos los equipos se muestra fijo en la parte superior du
   - 1 pista: 50 pts · 2 pistas: 40 pts · 3 pistas: 30 pts · 4 pistas: 20 pts · 5 pistas: 10 pts
 - Si nadie adivina, pulsa **"Nadie adivinó / Revelar"** para mostrar el nombre y continuar con otro jugador.
 
+#### 🛡️ Vista de Administrador (para que tú sepas quién es el jugador)
+Como las pistas se muestran en la misma pantalla que ve el público, normalmente tú tampoco sabrías el nombre hasta revelarlo. Para resolver esto:
+- En la pantalla de "Adivina el Jugador" pulsa **"🛡️ Abrir Vista de Administrador"**. Se abrirá una ventana nueva (`admin.html`) que siempre muestra el nombre completo del jugador actual y todas sus pistas, sincronizada en tiempo real con el juego.
+- **Importante:** esa ventana NO debe proyectarse. Si tu computadora está en modo "duplicar pantalla" (mirror), todo lo que ves tú también lo ve el público — en ese caso, simplemente consulta esa ventana en momentos discretos (por ejemplo, minimízala y solo ábrela un instante cuando un equipo grite una respuesta) o, mejor aún, configura tu computadora en modo "extender pantalla" (no duplicar) y arrastra la ventana de administrador a tu pantalla, dejando solo la ventana principal del juego en el proyector.
+- Alternativa sin tecnología: imprime la lista de los 50 jugadores (`js/data-players.js`) como una hoja de referencia física para el anfitrión.
+
 ## Efectos de sonido
 
 Los sonidos de gol, celebración, atajada, respuesta correcta/incorrecta y victoria se generan en tiempo real con la API de audio del navegador (Web Audio API). No se necesitan archivos de audio externos, así que funcionan sin internet y sin instalar nada. Si el navegador no reproduce sonido al inicio, haz clic una vez en cualquier botón de la pantalla de inicio (los navegadores requieren una interacción del usuario antes de permitir audio).

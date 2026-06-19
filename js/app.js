@@ -178,6 +178,11 @@ document.addEventListener("DOMContentLoaded", () => {
   botonVolverMenu("btn-tabla-volver");
   botonVolverMenu("btn-ganador-volver");
 
+  document.getElementById("btn-jugador-cancelar").addEventListener("click", () => {
+    jugadorActual = null;
+    difundirEstadoAdmin();
+  });
+
   // ==================== JUEGO 1: TRIVIA MUNDIALISTA ====================
   let triviaRonda = null;
 
@@ -393,9 +398,25 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==================== JUEGO 3: ADIVINA EL JUGADOR ====================
   let jugadorActual = null;
   let pistasMostradas = 0;
+  const CLAVE_ADMIN = "diaDelPadreFutbol_adminJugador_v1";
+
+  function difundirEstadoAdmin(extra) {
+    try {
+      const payload = jugadorActual
+        ? { nombre: jugadorActual.nombre, pistas: jugadorActual.pistas, pistasMostradas, ...extra }
+        : { nombre: null };
+      localStorage.setItem(CLAVE_ADMIN, JSON.stringify({ ...payload, ts: Date.now() }));
+    } catch (e) { /* ignorar si localStorage no está disponible (ej. file:// en algunos navegadores) */ }
+  }
 
   document.getElementById("btn-iniciar-jugador").addEventListener("click", () => {
     iniciarNuevoJugador();
+  });
+
+  document.querySelectorAll(".btn-abrir-admin").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      window.open("admin.html", "vistaAdminTorneo", "width=480,height=520");
+    });
   });
 
   function obtenerJugadorAleatorio() {
@@ -414,6 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("jugador-revelado").textContent = "";
     renderEquiposBotonJugador();
     renderPistas();
+    difundirEstadoAdmin();
   }
 
   function renderPistas() {
@@ -437,6 +459,7 @@ document.addEventListener("DOMContentLoaded", () => {
       pistasMostradas++;
       Sonidos.click();
       renderPistas();
+      difundirEstadoAdmin();
     }
   });
 

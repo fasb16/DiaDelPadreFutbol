@@ -203,6 +203,18 @@ h1, h2, h3 {
   cursor: pointer;
   font-weight: 800;
 }
+.aviso-admin {
+  background: rgba(244,180,0,0.18);
+  border: 2px dashed var(--dorado);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 1.05rem;
+}
+.btn-abrir-admin {
+  display: block;
+  margin: 0 auto 18px;
+}
+
 .mensaje-error {
   color: #ffd6d6;
   background: rgba(230,57,70,0.3);
